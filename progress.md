@@ -20,8 +20,8 @@
 - [X] Handle video length variations (short clips vs. long lectures >1 hr)
 
 **Checkpoint 3: Feature Integration & Refinement (09:00 PM)**
-- [ ] Build ADHD-friendly dashboard UI
-- [ ] Generate flashcards and health-style focus indicators (On Track / Drifting / Overwhelmed)
+- [x] Build ADHD-friendly dashboard UI
+- [x] Generate flashcards and health-style focus indicators (On Track / Drifting / Overwhelmed)
 
 **Checkpoint 4: Mid-Progress Review (11:00 PM)**
 - [ ] Finalize interactive timeline with clickable timestamps
