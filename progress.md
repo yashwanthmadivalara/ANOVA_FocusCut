@@ -15,9 +15,9 @@
 - [x] Define system inputs (YouTube URL, Transcript, Summary, Flashcards, Progress)
 
 **Checkpoint 2: Core Development Progress (05:00 PM)**
-- [ ] Extract transcript from YouTube video using caption data
-- [ ] Implement AI summarization logic (one-liner + bullet points)
-- [ ] Handle video length variations (short clips vs. long lectures >1 hr)
+- [X] Extract transcript from YouTube video using caption data
+- [X] Implement AI summarization logic (one-liner + bullet points)
+- [X] Handle video length variations (short clips vs. long lectures >1 hr)
 
 **Checkpoint 3: Feature Integration & Refinement (09:00 PM)**
 - [ ] Build ADHD-friendly dashboard UI
