@@ -1,0 +1,744 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FocusCut</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Fraunces:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      *, *::before, *::after { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: "DM Sans", sans-serif;
+        background: #fafaf8;
+        color: #2d2d2d;
+      }
+      a { text-decoration: none; color: inherit; }
+      .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+      .fade-up { animation: fadeUp 0.7s ease both; }
+      .delay-1 { animation-delay: 0.1s; }
+      .delay-2 { animation-delay: 0.2s; }
+      .delay-3 { animation-delay: 0.35s; }
+      .delay-4 { animation-delay: 0.5s; }
+      .delay-5 { animation-delay: 0.65s; }
+      @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(24px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      .cta-btn {
+        background: #2d2d2d;
+        color: #fff;
+        border: none;
+        border-radius: 999px;
+        padding: 14px 32px;
+        font-size: 15px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: transform 0.18s, box-shadow 0.18s;
+      }
+      .cta-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(45,45,45,0.18); }
+      .cta-soft {
+        background: transparent;
+        color: #2d2d2d;
+        border: 1.5px solid #d0cfc8;
+        border-radius: 999px;
+        padding: 13px 28px;
+        font-size: 15px;
+        cursor: pointer;
+      }
+      .cta-soft:hover { background: #f0efe8; border-color: #b0afa8; }
+      .url-input {
+        border: 1.5px solid #e0ded8;
+        border-radius: 999px;
+        padding: 14px 20px;
+        font-size: 15px;
+        background: #fff;
+        color: #2d2d2d;
+        outline: none;
+        width: 100%;
+        transition: border-color 0.2s, box-shadow 0.2s;
+      }
+      .url-input:focus { border-color: #5ba4cf; box-shadow: 0 0 0 4px rgba(91,164,207,0.12); }
+      .step-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #d0cfc8;
+        cursor: pointer;
+        transition: background 0.3s, transform 0.2s;
+      }
+      .step-dot.active { background: #2d2d2d; transform: scale(1.2); }
+      .feature-card { border-radius: 20px; padding: 26px 22px; transition: transform 0.2s; }
+      .feature-card:hover { transform: translateY(-4px); }
+      .tag {
+        display: inline-block;
+        background: #eef6fb;
+        color: #5ba4cf;
+        border-radius: 999px;
+        padding: 6px 14px;
+        font-size: 13px;
+        font-weight: 500;
+      }
+      .gradient-text {
+        background: linear-gradient(90deg, #5ba4cf, #b57ec0, #5ba4cf);
+        background-size: 200% auto;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        animation: shimmer 3s linear infinite;
+      }
+      @keyframes shimmer {
+        0% { background-position: -200% center; }
+        100% { background-position: 200% center; }
+      }
+      .panel {
+        background: #fff;
+        border-radius: 24px;
+        border: 1px solid #eeeae4;
+        padding: 28px;
+        box-shadow: 0 10px 36px rgba(0, 0, 0, 0.06);
+      }
+      .mode-btn {
+        border: 1px solid #d8d6cf;
+        background: #fff;
+        color: #2d2d2d;
+        border-radius: 999px;
+        padding: 8px 16px;
+        font-size: 13px;
+        cursor: pointer;
+      }
+      .mode-btn.active {
+        background: #2d2d2d;
+        color: #fff;
+        border-color: #2d2d2d;
+      }
+      .flashcard {
+        border-radius: 16px;
+        border: 1px solid #e4e2dc;
+        padding: 16px;
+        background: #fff;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+      }
+      .flashcard:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.08); }
+      .muted { color: #7a7a72; }
+      .error { color: #b23a3a; font-size: 14px; }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script type="text/babel">
+      const { useState, useEffect } = React;
+
+      const steps = [
+        {
+          title: "Paste a YouTube link",
+          desc: "Any tutorial, lecture, or explainer video works."
+        },
+        {
+          title: "FocusCut extracts the transcript",
+          desc: "If no transcript exists, local speech to text can fill the gap."
+        },
+        {
+          title: "Switch learning modes",
+          desc: "ADHD bullets, dyslexia text, and flashcards in one click."
+        }
+      ];
+
+      const features = [
+        {
+          color: "#E8F4FD",
+          title: "Smart chunking",
+          desc: "Split long videos into focused segments that are easier to finish."
+        },
+        {
+          color: "#F0F7EE",
+          title: "AI summaries",
+          desc: "Key takeaways in plain language with the noise removed."
+        },
+        {
+          color: "#FEF6E4",
+          title: "Auto flashcards",
+          desc: "Turn ideas into quick recall cards for fast review."
+        },
+        {
+          color: "#F9EEF9",
+          title: "Read aloud mode",
+          desc: "Audio support for learners who absorb better by listening."
+        },
+        {
+          color: "#FDEAEA",
+          title: "Timeline bookmarks",
+          desc: "Jump back to any moment without scrubbing the whole video."
+        },
+        {
+          color: "#EAF6F6",
+          title: "Progress tracking",
+          desc: "See what you learned and what is next each session."
+        }
+      ];
+
+      const testimonials = [
+        {
+          name: "Priya R.",
+          tag: "ADHD learner",
+          text: "I finally finished a full course that I kept abandoning."
+        },
+        {
+          name: "Marcus T.",
+          tag: "Dyslexic dev",
+          text: "The flashcards plus audio combination is perfect for me."
+        },
+        {
+          name: "Sam K.",
+          tag: "Neurodivergent student",
+          text: "FocusCut made YouTube feel manageable for the first time."
+        }
+      ];
+
+      const modes = [
+        { id: "summary", label: "Summary" },
+        { id: "adhd", label: "ADHD Mode" },
+        { id: "dyslexia", label: "Dyslexia Mode" },
+        { id: "flashcards", label: "Flashcards" }
+      ];
+
+      function Flashcard({ question, answer }) {
+        const [flipped, setFlipped] = useState(false);
+        return (
+          <div className="flashcard" onClick={() => setFlipped(!flipped)}>
+            <div style={{ fontSize: 13, color: "#9a9a92", marginBottom: 6 }}>
+              {flipped ? "Answer" : "Question"}
+            </div>
+            <div style={{ fontWeight: 500 }}>
+              {flipped ? answer : question}
+            </div>
+            <div style={{ fontSize: 12, color: "#9a9a92", marginTop: 12 }}>
+              Tap to flip
+            </div>
+          </div>
+        );
+      }
+
+      function App() {
+        const [activeStep, setActiveStep] = useState(0);
+        const [urlInput, setUrlInput] = useState("");
+        const [visible, setVisible] = useState(false);
+        const [activeMode, setActiveMode] = useState("summary");
+        const [result, setResult] = useState(null);
+        const [isLoading, setIsLoading] = useState(false);
+        const [error, setError] = useState("");
+
+        useEffect(() => {
+          setTimeout(() => setVisible(true), 100);
+          const interval = setInterval(
+            () => setActiveStep((step) => (step + 1) % steps.length),
+            2500
+          );
+          return () => clearInterval(interval);
+        }, []);
+
+        async function handleProcess() {
+          const trimmed = urlInput.trim();
+          if (!trimmed) {
+            setError("Enter a YouTube link to run the demo.");
+            return;
+          }
+
+          setError("");
+          setIsLoading(true);
+
+          try {
+            const response = await fetch("/api/process", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ url: trimmed })
+            });
+
+            if (!response.ok) {
+              const payload = await response.json().catch(() => ({}));
+              throw new Error(payload.error || "Unable to process the video.");
+            }
+
+            const data = await response.json();
+            setResult(data);
+            setActiveMode("adhd");
+          } catch (err) {
+            setError(err.message || "Something went wrong.");
+          } finally {
+            setIsLoading(false);
+          }
+        }
+
+        return (
+          <div>
+            <nav
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                padding: "20px 48px",
+                borderBottom: "1px solid #eeede8",
+                background: "#fafaf8",
+                position: "sticky",
+                top: 0,
+                zIndex: 100
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <div
+                  style={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: 10,
+                    background: "#2d2d2d",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: 14,
+                    color: "#fff",
+                    fontWeight: 600
+                  }}
+                >
+                  FC
+                </div>
+                <span
+                  style={{
+                    fontFamily: "'Fraunces', serif",
+                    fontWeight: 600,
+                    fontSize: 18
+                  }}
+                >
+                  FocusCut
+                </span>
+              </div>
+              <div style={{ display: "flex", gap: 32 }}>
+                <a href="#how">How it works</a>
+                <a href="#demo">Live demo</a>
+                <a href="#features">Features</a>
+              </div>
+              <button className="cta-btn" style={{ padding: "10px 22px", fontSize: 14 }}>
+                Try free ->
+              </button>
+            </nav>
+
+            <section
+              className="container"
+              style={{ padding: "80px 24px 60px", textAlign: "center" }}
+            >
+              {visible && (
+                <>
+                  <div className="fade-up delay-1" style={{ marginBottom: 20 }}>
+                    <span className="tag">Built for ADHD and neurodivergent learners</span>
+                  </div>
+                  <h1
+                    className="fade-up delay-2"
+                    style={{
+                      fontFamily: "'Fraunces', serif",
+                      fontSize: "clamp(42px, 6vw, 68px)",
+                      fontWeight: 600,
+                      lineHeight: 1.12,
+                      marginBottom: 20,
+                      letterSpacing: "-0.02em"
+                    }}
+                  >
+                    YouTube tutorials,<br />
+                    <span className="gradient-text">finally learnable.</span>
+                  </h1>
+                  <p
+                    className="fade-up delay-3"
+                    style={{
+                      fontSize: 18,
+                      color: "#6a6a6a",
+                      lineHeight: 1.7,
+                      maxWidth: 560,
+                      margin: "0 auto 40px",
+                      fontWeight: 300
+                    }}
+                  >
+                    FocusCut turns long videos into structured learning for ADHD,
+                    dyslexia, and other neurodivergent minds.
+                  </p>
+                  <div
+                    className="fade-up delay-4"
+                    style={{
+                      display: "flex",
+                      gap: 10,
+                      maxWidth: 560,
+                      margin: "0 auto 20px",
+                      padding: "0 16px"
+                    }}
+                  >
+                    <input
+                      className="url-input"
+                      placeholder="Paste a YouTube link..."
+                      value={urlInput}
+                      onChange={(event) => setUrlInput(event.target.value)}
+                    />
+                    <button className="cta-btn" style={{ whiteSpace: "nowrap" }} onClick={handleProcess}>
+                      Cut it
+                    </button>
+                  </div>
+                  {error && <div className="error">{error}</div>}
+                  <p className="fade-up delay-5" style={{ fontSize: 13, color: "#aeaca6" }}>
+                    No sign up needed. Works with any public video.
+                  </p>
+                </>
+              )}
+            </section>
+
+            <div
+              style={{
+                borderTop: "1px solid #eeede8",
+                borderBottom: "1px solid #eeede8",
+                padding: "20px 48px",
+                display: "flex",
+                justifyContent: "center",
+                gap: "60px",
+                flexWrap: "wrap",
+                background: "#f5f4f0"
+              }}
+            >
+              {[
+                ["10k+", "videos cut"],
+                ["94%", "said it helped them focus"],
+                ["4.9", "average rating"]
+              ].map(([value, label]) => (
+                <div key={label} style={{ textAlign: "center" }}>
+                  <div style={{ fontFamily: "'Fraunces', serif", fontSize: 26, fontWeight: 600 }}>
+                    {value}
+                  </div>
+                  <div style={{ fontSize: 13, color: "#8a8a82", marginTop: 2 }}>
+                    {label}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <section id="how" className="container" style={{ margin: "80px auto" }}>
+              <h2
+                style={{
+                  fontFamily: "'Fraunces', serif",
+                  fontSize: 36,
+                  fontWeight: 600,
+                  textAlign: "center",
+                  marginBottom: 12,
+                  letterSpacing: "-0.02em"
+                }}
+              >
+                How it works
+              </h2>
+              <p style={{ textAlign: "center", color: "#6a6a6a", marginBottom: 48 }}>
+                Three steps, under a minute.
+              </p>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+                  gap: 24
+                }}
+              >
+                {steps.map((step, index) => (
+                  <div
+                    key={step.title}
+                    onClick={() => setActiveStep(index)}
+                    style={{
+                      background: activeStep === index ? "#fff" : "#f5f4f0",
+                      border: `1.5px solid ${activeStep === index ? "#d0d8e8" : "transparent"}`,
+                      borderRadius: 20,
+                      padding: "28px 22px",
+                      cursor: "pointer",
+                      transition: "all 0.3s",
+                      boxShadow: activeStep === index ? "0 8px 32px rgba(0,0,0,0.07)" : "none",
+                      transform: activeStep === index ? "translateY(-4px)" : "none"
+                    }}
+                  >
+                    <div style={{ fontSize: 14, color: "#aeaca6", marginBottom: 12 }}>
+                      Step 0{index + 1}
+                    </div>
+                    <div style={{ fontWeight: 500, fontSize: 16, marginBottom: 8 }}>
+                      {step.title}
+                    </div>
+                    <div style={{ fontSize: 14, color: "#7a7a72", lineHeight: 1.6 }}>
+                      {step.desc}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div style={{ display: "flex", justifyContent: "center", gap: 8, marginTop: 24 }}>
+                {steps.map((_, index) => (
+                  <div
+                    key={index}
+                    className={`step-dot ${activeStep === index ? "active" : ""}`}
+                    onClick={() => setActiveStep(index)}
+                  />
+                ))}
+              </div>
+            </section>
+
+            <section id="demo" className="container" style={{ marginBottom: 80 }}>
+              <div className="panel">
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
+                  <div>
+                    <h2 style={{ fontFamily: "'Fraunces', serif", fontSize: 30, marginBottom: 8 }}>
+                      Live demo
+                    </h2>
+                    <p className="muted">
+                      Paste a link to see the AI formats that FocusCut generates.
+                    </p>
+                  </div>
+                  <div className="tag" style={{ background: "#f0f7ee", color: "#5ba85b" }}>
+                    Local processing ready
+                  </div>
+                </div>
+
+                <div style={{ display: "flex", gap: 10, marginTop: 20, flexWrap: "wrap" }}>
+                  <input
+                    className="url-input"
+                    placeholder="https://www.youtube.com/watch?v=..."
+                    value={urlInput}
+                    onChange={(event) => setUrlInput(event.target.value)}
+                    style={{ flex: "1 1 320px" }}
+                  />
+                  <button className="cta-btn" onClick={handleProcess} disabled={isLoading}>
+                    {isLoading ? "Processing..." : "Generate formats"}
+                  </button>
+                </div>
+                {error && <div className="error" style={{ marginTop: 12 }}>{error}</div>}
+
+                <div style={{ display: "flex", gap: 10, marginTop: 24, flexWrap: "wrap" }}>
+                  {modes.map((mode) => (
+                    <button
+                      key={mode.id}
+                      className={`mode-btn ${activeMode === mode.id ? "active" : ""}`}
+                      onClick={() => setActiveMode(mode.id)}
+                      disabled={!result}
+                    >
+                      {mode.label}
+                    </button>
+                  ))}
+                </div>
+
+                {!result && (
+                  <div style={{ marginTop: 24, color: "#8a8a82" }}>
+                    Enter a link to see summaries, timelines, and flashcards.
+                  </div>
+                )}
+
+                {result && (
+                  <div style={{ marginTop: 24 }}>
+                    <div className="muted" style={{ fontSize: 13, marginBottom: 12 }}>
+                      {result.notice}
+                    </div>
+
+                    {activeMode === "summary" && (
+                      <div>
+                        <h3 style={{ marginBottom: 12 }}>Summary</h3>
+                        <ul>
+                          {result.summary.bullets.map((item, index) => (
+                            <li key={index} style={{ marginBottom: 8 }}>{item}</li>
+                          ))}
+                        </ul>
+                        <p className="muted">{result.summary.paragraph}</p>
+                      </div>
+                    )}
+
+                    {activeMode === "adhd" && (
+                      <div>
+                        <h3 style={{ marginBottom: 12 }}>ADHD friendly bullets</h3>
+                        <ul>
+                          {result.adhd.bullets.map((item, index) => (
+                            <li key={index} style={{ marginBottom: 8 }}>{item}</li>
+                          ))}
+                        </ul>
+                        <h4 style={{ marginTop: 24 }}>Timeline</h4>
+                        <div style={{ display: "grid", gap: 12, marginTop: 12 }}>
+                          {result.adhd.timeline.map((entry, index) => (
+                            <div key={index} style={{ padding: 12, borderRadius: 12, background: "#f7f6f1" }}>
+                              <div style={{ fontSize: 12, color: "#9a9a92" }}>{entry.time}</div>
+                              <div style={{ fontWeight: 500 }}>{entry.title}</div>
+                              <div className="muted" style={{ fontSize: 13 }}>{entry.summary}</div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {activeMode === "dyslexia" && (
+                      <div>
+                        <h3 style={{ marginBottom: 12 }}>Dyslexia friendly text</h3>
+                        <div
+                          style={{
+                            background: "#f7f6f1",
+                            padding: 16,
+                            borderRadius: 12,
+                            lineHeight: 1.8,
+                            fontSize: 18,
+                            whiteSpace: "pre-line"
+                          }}
+                        >
+                          {result.dyslexia.text}
+                        </div>
+                        <ul style={{ marginTop: 16 }}>
+                          {result.dyslexia.tips.map((tip, index) => (
+                            <li key={index}>{tip}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    {activeMode === "flashcards" && (
+                      <div>
+                        <h3 style={{ marginBottom: 12 }}>Flashcards</h3>
+                        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 16 }}>
+                          {result.flashcards.map((card, index) => (
+                            <Flashcard key={index} question={card.question} answer={card.answer} />
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </section>
+
+            <section id="features" className="container" style={{ margin: "0 auto 80px" }}>
+              <h2
+                style={{
+                  fontFamily: "'Fraunces', serif",
+                  fontSize: 36,
+                  fontWeight: 600,
+                  textAlign: "center",
+                  marginBottom: 12,
+                  letterSpacing: "-0.02em"
+                }}
+              >
+                Everything your brain needs
+              </h2>
+              <p style={{ textAlign: "center", color: "#6a6a6a", marginBottom: 48 }}>
+                Designed with neurodivergent learners from day one.
+              </p>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
+                  gap: 16
+                }}
+              >
+                {features.map((feature) => (
+                  <div key={feature.title} className="feature-card" style={{ background: feature.color }}>
+                    <div style={{ fontWeight: 600, marginBottom: 10 }}>{feature.title}</div>
+                    <div style={{ fontSize: 14, color: "#5a5a52", lineHeight: 1.6 }}>
+                      {feature.desc}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            <section style={{ background: "#f0eee8", padding: "64px 24px" }}>
+              <div className="container">
+                <h2
+                  style={{
+                    fontFamily: "'Fraunces', serif",
+                    fontSize: 36,
+                    fontWeight: 600,
+                    textAlign: "center",
+                    marginBottom: 48,
+                    letterSpacing: "-0.02em"
+                  }}
+                >
+                  Real learners, real breakthroughs
+                </h2>
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
+                    gap: 20
+                  }}
+                >
+                  {testimonials.map((item) => (
+                    <div
+                      key={item.name}
+                      style={{
+                        background: "#fff",
+                        borderRadius: 20,
+                        padding: "28px 24px",
+                        border: "1px solid #e8e7e0"
+                      }}
+                    >
+                      <p style={{ fontSize: 15, lineHeight: 1.7, color: "#3a3a3a", marginBottom: 20 }}>
+                        "{item.text}"
+                      </p>
+                      <div style={{ fontWeight: 500, fontSize: 14 }}>{item.name}</div>
+                      <div style={{ fontSize: 12, color: "#9a9a92" }}>{item.tag}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </section>
+
+            <section className="container" style={{ padding: "80px 24px", textAlign: "center" }}>
+              <h2
+                style={{
+                  fontFamily: "'Fraunces', serif",
+                  fontSize: 40,
+                  fontWeight: 600,
+                  marginBottom: 16,
+                  letterSpacing: "-0.02em",
+                  lineHeight: 1.2
+                }}
+              >
+                Your next learning breakthrough starts here.
+              </h2>
+              <p style={{ color: "#6a6a6a", fontSize: 16, marginBottom: 36, lineHeight: 1.7 }}>
+                Paste a YouTube link and see FocusCut in action. No account required.
+              </p>
+              <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
+                <button className="cta-btn" style={{ padding: "16px 36px", fontSize: 16 }}>
+                  Start free ->
+                </button>
+                <button className="cta-soft" style={{ padding: "16px 28px", fontSize: 15 }}>
+                  Watch demo
+                </button>
+              </div>
+            </section>
+
+            <footer
+              style={{
+                borderTop: "1px solid #eeede8",
+                padding: "24px 48px",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                flexWrap: "wrap",
+                gap: 12
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <span style={{ fontFamily: "'Fraunces', serif", fontWeight: 600, fontSize: 15 }}>
+                  FocusCut
+                </span>
+                <span style={{ color: "#aeaca6", fontSize: 13 }}>
+                  Made for neurodivergent learners
+                </span>
+              </div>
+              <div style={{ fontSize: 13, color: "#aeaca6" }}>Copyright 2025 FocusCut</div>
+            </footer>
+          </div>
+        );
+      }
+
+      const root = ReactDOM.createRoot(document.getElementById("root"));
+      root.render(<App />);
+    </script>
+  </body>
+</html>
