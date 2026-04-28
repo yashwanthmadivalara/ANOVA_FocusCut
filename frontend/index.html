@@ -235,6 +235,9 @@
         const [activeMode, setActiveMode] = useState("summary");
         const [result, setResult] = useState(null);
         const [isLoading, setIsLoading] = useState(false);
+        const [isTranscribing, setIsTranscribing] = useState(false);
+        const [audioFile, setAudioFile] = useState(null);
+        const [transcriptPreview, setTranscriptPreview] = useState("");
         const [error, setError] = useState("");
 
         useEffect(() => {
@@ -260,7 +263,7 @@
             const response = await fetch("/api/process", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ url: trimmed })
+              body: JSON.stringify({ url: trimmed, allowDemoFallback: true })
             });
 
             if (!response.ok) {
@@ -273,6 +276,62 @@
             setActiveMode("adhd");
           } catch (err) {
             setError(err.message || "Something went wrong.");
+          } finally {
+            setIsLoading(false);
+          }
+        }
+
+        async function handleTranscribe() {
+          if (!audioFile) {
+            setError("Choose an audio file to transcribe.");
+            return;
+          }
+
+          setError("");
+          setIsTranscribing(true);
+
+          try {
+            const formData = new FormData();
+            formData.append("audio", audioFile);
+
+            const response = await fetch("/api/transcribe", {
+              method: "POST",
+              body: formData
+            });
+
+            if (!response.ok) {
+              const payload = await response.json().catch(() => ({}));
+              throw new Error(payload.error || "Unable to transcribe audio.");
+            }
+
+            const data = await response.json();
+            setTranscriptPreview(data.text);
+
+            await runProcessWithTranscript(data.text);
+          } catch (err) {
+            setError(err.message || "Transcription failed.");
+          } finally {
+            setIsTranscribing(false);
+          }
+        }
+
+        async function runProcessWithTranscript(transcript) {
+          setIsLoading(true);
+          try {
+            const response = await fetch("/api/process", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ transcript, allowDemoFallback: false })
+            });
+
+            if (!response.ok) {
+              const payload = await response.json().catch(() => ({}));
+              throw new Error(payload.error || "Unable to process the transcript.");
+            }
+
+            const data = await response.json();
+            setResult(data);
+            setActiveMode("adhd");
           } finally {
             setIsLoading(false);
           }
@@ -512,6 +571,29 @@
                     {isLoading ? "Processing..." : "Generate formats"}
                   </button>
                 </div>
+                <div style={{ marginTop: 16 }}>
+                  <div style={{ fontSize: 13, color: "#9a9a92", marginBottom: 8 }}>
+                    Or upload an audio file (mp3, wav, flac)
+                  </div>
+                  <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                    <input
+                      type="file"
+                      accept="audio/*"
+                      onChange={(event) => {
+                        const file = event.target.files && event.target.files[0];
+                        setAudioFile(file || null);
+                      }}
+                    />
+                    <button className="cta-soft" onClick={handleTranscribe} disabled={isTranscribing}>
+                      {isTranscribing ? "Transcribing..." : "Transcribe audio"}
+                    </button>
+                  </div>
+                  {audioFile && (
+                    <div style={{ fontSize: 12, color: "#9a9a92", marginTop: 6 }}>
+                      Selected: {audioFile.name}
+                    </div>
+                  )}
+                </div>
                 {error && <div className="error" style={{ marginTop: 12 }}>{error}</div>}
 
                 <div style={{ display: "flex", gap: 10, marginTop: 24, flexWrap: "wrap" }}>
@@ -538,6 +620,18 @@
                     <div className="muted" style={{ fontSize: 13, marginBottom: 12 }}>
                       {result.notice}
                     </div>
+                    {transcriptPreview && (
+                      <div style={{ marginBottom: 16, fontSize: 13, color: "#7a7a72" }}>
+                        Transcript preview: {transcriptPreview.slice(0, 140)}...
+                      </div>
+                    )}
+                    {result.warnings && result.warnings.length > 0 && (
+                      <div style={{ background: "#fff6e5", padding: 12, borderRadius: 12, fontSize: 13, marginBottom: 16 }}>
+                        {result.warnings.map((warning, index) => (
+                          <div key={index} style={{ marginBottom: 6 }}>{warning}</div>
+                        ))}
+                      </div>
+                    )}
 
                     {activeMode === "summary" && (
                       <div>
