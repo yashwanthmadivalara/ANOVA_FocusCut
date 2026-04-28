@@ -28,5 +28,5 @@
 - [x] Generate flashcards and health-style focus indicators (On Track / Drifting / Overwhelmed)
 
 **Checkpoint 4: Mid-Progress Review (11:00 PM)**
-- [ ] Finalize interactive timeline with clickable timestamps
-- [ ] Ensure output shows recommended watch segments and reason for prioritization
+- [x] Finalize interactive timeline with clickable timestamps
+- [x] Ensure output shows recommended watch segments and reason for prioritization
