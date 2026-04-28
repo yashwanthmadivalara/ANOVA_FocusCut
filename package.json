@@ -1,0 +1,19 @@
+{
+  "name": "focuscut",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Hackathon demo for turning long YouTube tutorials into neurodivergent-friendly study kits.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "he": "^1.2.0",
+    "youtube-transcript-api": "^3.0.6"
+  }
+}
