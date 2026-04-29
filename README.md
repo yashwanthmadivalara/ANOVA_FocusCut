@@ -53,9 +53,10 @@ Higher score = more likely to appear in the summary. Concept density carries the
 
 ## 6. Tech Stack
 
-- **Language:** Javascript (backend), HTML & CSS (frontend)
-- **Data Processing:** AI summarization on extracted transcript data
-- **UI:** ADHD-friendly dashboard — dark mode, large text, minimal distractions
+- **Language:** Javascript, Nodegs, Express, Built-in Fetch() (backend), HTML, CSS, React18, ReactDOM (frontend).
+- **External services:** groq API, OpenAI TTS API, Youtube oEmbed.
+- **Data Processing:** AI summarization on extracted transcript data.
+- **UI:** ADHD-friendly dashboard — dark mode, large text, minimal distractions.
 
 ---
 
