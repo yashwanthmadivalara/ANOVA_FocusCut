@@ -633,12 +633,6 @@ function App() {
               Claude-powered summaries, timeline checkpoints, dyslexia-friendly reading, flashcards,
               audio support, and progress tracking that survives refreshes.
             </p>
-
-            <div className="hero-points">
-              <div className="hero-point">Judges understand the problem in one glance: long tutorials are hard to finish.</div>
-              <div className="hero-point">The workflow is demo-ready in one pass: paste link, process, listen, review, resume.</div>
-              <div className="hero-point">The stack clearly shows multiple AI surfaces without burying the core experience.</div>
-            </div>
           </div>
 
           <div className="hero-side">
@@ -660,7 +654,7 @@ function App() {
           </div>
         </div>
       </div>
-
+              <br></br>
       <div className="container surface-grid">
         <section className="input-strip" id="demo">
           <div className="strip-head">
