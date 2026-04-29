@@ -53,7 +53,7 @@ Higher score = more likely to appear in the summary. Concept density carries the
 
 ## 6. Tech Stack
 
-- **Language:** Python (backend), JavaScript (frontend)
+- **Language:** Javascript (backend), HTML & CSS (frontend)
 - **Data Processing:** AI summarization on extracted transcript data
 - **UI:** ADHD-friendly dashboard — dark mode, large text, minimal distractions
 
@@ -61,7 +61,6 @@ Higher score = more likely to appear in the summary. Concept density carries the
 
 ## 7. Setup & Demo Instructions
 
-1. Clone the repository: `git clone https://github.com/your-username/focuscut`
-2. Install requirements: `pip install -r requirements.txt`
-3. Run the app: `python app.py`
-4. Paste any YouTube URL, select your focus mode, and get your instant summary, timeline, and flashcards
+1. Clone the repository: `git clone https://github.com/yashwanthmadivalara/ANOVA_FocusCut`
+2. Run the app: `npm start`
+3. Paste any YouTube URL, select your focus mode, and get your instant summary, timeline, and flashcards
